@@ -70,9 +70,9 @@ def main():
             st.warning("Please enter a valid YouTube video URL.")
 
     if audio_playing:
-        if st.button("Stop Audio"):
+        if st.button("Return"):
             stop_audio()
-            st.success("Audio playback stopped.")
+            st.success("Please enter another link")
 
 if __name__ == '__main__':
     main()
