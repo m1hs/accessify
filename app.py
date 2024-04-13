@@ -3,7 +3,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from gtts import gTTS
 import pygame
 
-
++
 def text_to_speech(text):
     tts = gTTS(text=text, lang='en')  
     tts.save('output.mp3')  
@@ -28,11 +28,12 @@ def main():
                 st.write("Transcript:")
                 st.write(transcript_text)
                 st.write("Reading Transcript:")
-                text_to_speech(transcript_text)
             except Exception as e:
                 st.write("Error occurred:", Fix it)
         else:
             st.write("Please enter a valid YouTube video URL.")
 
+        if st.button("Play Transcript Audio")
+            text_to_speech(transcript_text)
 if __name__ == '__main__':
     main()
