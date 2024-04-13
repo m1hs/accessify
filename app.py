@@ -1,7 +1,6 @@
 import streamlit as st
 from summarizer import summarize_and_translate, SUPPORTED_LANGUAGES
 from audio_generator import text_to_speech, play_audio_blocking, stop_audio
-
 def main():
     st.title("YouTube Transcript Summarizer")
 
