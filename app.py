@@ -1,35 +1,54 @@
 import streamlit as st
-from summarizer import summarize_and_translate, SUPPORTED_LANGUAGES
-from audio_generator import text_to_speech, play_audio_blocking, stop_audio
+import fitz  
+from summa.summarizer import summarize
+from googletrans import Translator
+from gtts import gTTS
+from io import BytesIO
+
+LANGUAGES = {
+    'English': 'en',
+    'French': 'fr',
+    'German': 'de',
+    'Spanish': 'es',
+}
+
+def extract_text_from_pdf(file):
+    pdf_data = file.read()
+    doc = fitz.open(stream=pdf_data, filetype="pdf")
+    text = "".join(page.get_text() for page in doc)
+    doc.close()
+    return text
+
+def translate_text(text, dest_language='en'):
+    translator = Translator()
+    translated = translator.translate(text, dest=dest_language)
+    return translated.text
 
 def main():
-    st.title("YouTube Transcript Summarizer")
+    st.title("Accessify - PDF Translator and Summarizer")
 
-    supported_languages = list(SUPPORTED_LANGUAGES.keys())
-    target_language = st.selectbox("Select Target Language:", supported_languages)
+    file = st.file_uploader("Upload a PDF file", type=["pdf"])
 
-    video_url = st.text_input("Enter YouTube video URL:")
+    if file:
+        pdf_text = extract_text_from_pdf(file)
 
-    if st.button("Generate Summary Audio"):
-        if video_url:
-            transcript_text, translated_summary = summarize_and_translate(video_url, target_language)
+        st.subheader("PDF Content")
+        st.write(pdf_text)
 
-            if transcript_text and translated_summary:
-                st.subheader("Original Transcript:")
-                st.write(transcript_text)
+        dest_language = st.selectbox("Select destination language:", list(LANGUAGES.keys()))
 
-                st.subheader(f"Translated Summary ({target_language}):")
-                st.write(translated_summary)
+        if st.button("Summarize and Translate"):
+            if pdf_text:
+                summarized_text = summarize(pdf_text)
+                translated_text = translate_text(summarized_text, LANGUAGES[dest_language])
 
-                st.success("Generating summary audio...")
-                text_to_speech(translated_summary, lang=SUPPORTED_LANGUAGES[target_language])
-                play_audio_blocking()
-        else:
-            st.warning("Please enter a valid YouTube video URL.")
+                st.subheader("Summarized and Translated Text")
+                st.write(translated_text)
 
-    if st.button("Stop Audio"):
-        stop_audio()
-        st.success("Audio playback stopped.")
+                if translated_text:
+                    with BytesIO() as audio_bytes:
+                        gTTS(translated_text, lang=LANGUAGES[dest_language]).write_to_fp(audio_bytes)
+                        st.audio(audio_bytes.getvalue(), format='audio/mp3')
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
