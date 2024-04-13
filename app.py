@@ -1,12 +1,17 @@
 import streamlit as st
-import pyttsx3
+from gtts import gTTS
+from io import BytesIO
+from pygame import mixer
 
-# Function to convert text to speech
+# Function to convert text to speech and play it
 def text_to_speech(text):
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 150)  # Speed of speech
-    engine.say(text)
-    engine.runAndWait()
+    tts = gTTS(text=text, lang='en')  # Create gTTS object with text and language
+    fp = BytesIO()  # Create an in-memory file-like object
+    tts.write_to_fp(fp)  # Write audio content to the file-like object
+    fp.seek(0)  # Move cursor to the beginning of the file-like object
+    mixer.init()  # Initialize the audio mixer
+    mixer.music.load(fp)  # Load audio data from the file-like object
+    mixer.music.play()  # Play the audio
 
 # Streamlit app
 def main():
