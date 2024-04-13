@@ -5,8 +5,8 @@ import pygame
 
 
 def text_to_speech(text):
-    tts = gTTS(text=text, lang='en')  
-    tts.save('output.mp3')  
+    tts = gTTS(text=text, lang='en')
+    tts.save('output.mp3')
     pygame.mixer.init()
     pygame.mixer.music.load('output.mp3')
     pygame.mixer.music.play()
@@ -15,24 +15,30 @@ def text_to_speech(text):
 def main():
     st.title("YouTube Transcript Reader")
 
-    
     video_url = st.text_input("Enter YouTube video URL:")
 
-    
     if st.button("Get Transcript"):
         if video_url:
             try:
-                video_id = video_url.split("v=")[1] 
+                video_id = video_url.split("v=")[1]
                 transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
                 transcript_text = ' '.join([t['text'] for t in transcript_list])
                 st.write("Transcript:")
                 st.write(transcript_text)
-                st.write("Reading Transcript:")
-                text_to_speech(transcript_text)
+                st.session_state.transcript_text = transcript_text  # Store transcript in session state
             except Exception as e:
-                st.write("Error occurred:", Fix it)
+                st.write("Error occurred:", e)
         else:
             st.write("Please enter a valid YouTube video URL.")
 
-if __name__ == '__main__':
-    main()
+    if st.button("Read Transcript") and 'transcript_text' in st.session_state:
+        transcript_text = st.session_state.transcript_text
+        st.write("Reading Transcript:")
+        text_to_speech(transcript_text)
+
+    # Audio playback control buttons
+    if 'transcript_text' in st.session_state:
+        if st.button("Play"):
+            pygame.mixer.music.unpause()  # Resume playback if paused or stopped
+        if st.button("Pause"):
+            pygame.mixer.music.pause()  # Pause playback
